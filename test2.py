@@ -15,23 +15,30 @@ p = 1
 for i in aa :
 
     au = i.select('span[class="f3 hl push-userid"]')
+    push_type1 = i.select('span[class="hl push-tag"]')
+    push_type2 = i.select('span[class="f1 hl push-tag"]')
     main = i.select('span[class="f3 push-content"]')
     #print(au[0].string)
     #print(main[0].string)
 
-    
     if  au[0].string != name1:
         if p == 1:
             name1 = au[0].string
             text = text + main[0].string[2::]
         else:
             
+
+
+            if len(push_type1) > 0 : 
+                print(push_type1[0].string)
+            else:
+                print(push_type2[0].string)
             s1 = snownlp.SnowNLP(text)
             print(name1)
             print(text,s1.sentiments)
             name1 = au[0].string
             text = main[0].string[2::]
-        
+            
         
     else:
         #print(text)
