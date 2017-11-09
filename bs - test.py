@@ -5,7 +5,7 @@ import pandas
 from functools import reduce  
 
 list1 = []
-for j in range(2000,2020):
+for j in range(2000,2010):
     res = requests.get('https://www.ptt.cc/bbs/creditcard/index' + str(j) + '.html')
     soup=bs4.BeautifulSoup(res.text, "html.parser")
 
