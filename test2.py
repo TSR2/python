@@ -12,6 +12,7 @@ aa = soup.select('div[class="push"]')
 name1 = ""
 text = ""
 p = 1
+list_response = []
 for i in aa :
 
     au = i.select('span[class="f3 hl push-userid"]')
@@ -36,6 +37,7 @@ for i in aa :
             s1 = snownlp.SnowNLP(text)
             print(name1)
             print(text,s1.sentiments)
+            list_response.append(text)
             name1 = au[0].string
             text = main[0].string[2::]
             

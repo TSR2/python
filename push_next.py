@@ -9,20 +9,20 @@ soup=bs4.BeautifulSoup(res.text, "html.parser")
 aa = soup.select('div[class="push"]')
 # aa = soup.select('span[class="f3 hl push-userid"]')
 
-au1 = aa[0].select('span[class="f3 hl push-userid"]')
-print(len(aa[0].contents))
+# au1 = aa[0].select('span[class="f3 hl push-userid"]')
+# print(len(aa[0].contents))
 # print(au1)
 # print(au1[0].string)
 
-print(list(map(lambda x:len(x.contents), aa)))
+#print(list(map(lambda x:len(x.contents), aa)))
 push_type = list(map(lambda x:x.contents[0].string, aa))
-print(push_type)
+#print(push_type)
 auth = list(map(lambda x:x.contents[1].string, aa))
-print(auth)
+#print(auth)
 content = list(map(lambda x:x.contents[2].string[2::], aa))
-print(content)
+#print(content)
 sss = list(map(lambda x:x.contents[3].string, aa))
-print(sss)
+#print(sss)
 
 
 x = {}
