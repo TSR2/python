@@ -32,21 +32,27 @@ for j in range(2000,2001):
         #        text = text + "\n" + p.string
         content = filter(lambda x: type(x) != bs4.element.Tag, main_text[0].contents)
         content1 = reduce(lambda x,y: x+y,map(lambda x: x.string,content))
-        print(content1)
-        print(snownlp.SnowNLP(content1).sentiments)
+        #print(content1)
+        #print(snownlp.SnowNLP(content1).sentiments)
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        #print(list(jieba.cut(content1)))
+        print(list(jieba.cut(content1)))
         #推文
         push_tag = main_soup.select('div[class="push"]')
         #print(list(map(lambda x:len(x.contents), push_tag)))
+        print(push_tag)
 
+        def get_push(x):
+            if x.contents[2].string != None :  
+                return x.contents[2].string[2::]
+            else :
+                return " "
 
         #print(list(map(lambda x:len(x.contents), aa)))
         push_type = list(map(lambda x:x.contents[0].string, push_tag))
         #print(push_type)
         auth = list(map(lambda x:x.contents[1].string, push_tag))
         #print(auth)
-        content = list(map(lambda x:x.contents[2].string[2::], push_tag))
+        content = list(map(get_push, push_tag))
         #print(content)
         sss = list(map(lambda x:x.contents[3].string, push_tag))
         #print(sss)
@@ -69,6 +75,9 @@ for j in range(2000,2001):
 
         if push[i].string == None:
             push[i].string = '0'
-        if  title[i].string != None:
-            list1.append([title[i].string, title[i]['href'], push[i].string, author[i].string, date[i].string,content1]) 
+        if title[i].string != None:
+            list1.append([title[i].string, title[i]['href'], push[i].string, author[i].string, date[i].string,content1, list(se)]) 
 
+
+for i in range(5):
+    print(list1[i])
