@@ -5,6 +5,7 @@ library(plyr)
 library(stringr)
 library(ggplot2)
 library(wordcloud)
+library(wordcloud2)
 library(Rwordseg)
 library(XML)
 library(RCurl)
@@ -40,7 +41,7 @@ split_list %>% sapply( function(x) vector_keywords(x[[2]],keys))
 
 
 
-#情感分析 字典
+#情感分析 字典(若沒有下載字典，這段不用跑)
 pos = read.table("C:/Users/TSR/Desktop/project data/pos.txt",stringsAsFactors = FALSE)
 pos = pos[,1]
 pos[1:100]
@@ -65,29 +66,23 @@ rbind(test1,test1[2,]/test1[3,])
 
 
 #情感分析 自創
-test = index_data_test
-index_data_test[1,]
-index_data_test$tag
+
 map_sentment_alan = function(y){
   score = split_list %>% sapply(function(x) x[[2]] %in% y %>% sum %>% prod(x[[1]]))  %>% sum
   count = split_list %>% sapply(function(x) x[[2]] %in% y %>% sum )  %>% sum
   if (count == 0) count = 1
-  #print(paste("count:",count))
-  #print(paste("score:",score))
-  #print(paste("score/count",score/count)) 
   score/count
 }
-ss = c()
-test_size = dim(test)[1]
-for (i in 1:test_size) {
-  test_file = wk[test[i,4]]
-  tt1 = test_file %>% sapply(map_sentment_alan) %>% mean
-  ss = c(ss,tt1)
+sentment_predict = function(article){
+  test_file = wk[article[4]]
+  predict_score = test_file %>% sapply(map_sentment_alan) %>% mean
 }
-index_data_test$tag
-t = data.frame(index_data_test$tag[1:test_size],ss)
 
-cor.test(index_data_test$tag[1:test_size],ss,method="pearson")
+predict_list = index_data_test %>% apply(1,sentment_predict)
 
-split_list[[2]][[2]] %in% wk[test[1,4]][1]
+data.frame(index_data_test$tag,predict_list)
+
+cor.test(index_data_test$tag,predict_list,method="pearson")
+
+
 
