@@ -3,6 +3,7 @@ from collections import Counter
 import jieba
 import csv
 import toolz
+import string
 
 with open('C:/Users/TSR/Desktop/project data/ptt_tag_V1.csv') as csvfile:
     spamreader = csv.reader(csvfile)
