@@ -49,5 +49,5 @@ for i in range(len(title)):
     if push[i].string == None:
         push[i].string = '0'
     if  title[i].string != None:
-        list1.append([title[i].string, title[i]['href'], push[i].string, author[i].string, date[i].string]) 
+        list1.append([title[i].string, title[i]['href'], ush[i].string, author[i].string, date[i].string]) 
 
