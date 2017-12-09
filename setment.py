@@ -4,7 +4,18 @@ import jieba
 import csv
 import toolz
 import string
+from scipy.stats.stats import pearsonr
+import re
 
+r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n！？，﹚﹞！），．：；？｜︶︸︺︼︾﹀﹂﹄﹏､～]+' 
+
+
+# =============================================================================
+# r = '''[:!),.:;?]}¢'"、。〉》」』】〕〗〞︰︱︳﹐､﹒
+# ﹔﹕﹖﹗﹚﹞！），．：；？｜︶︸︺︼︾﹀﹂﹄﹏､～￠
+# 々‖•·ˇˉ′’”([{£¥'"‵〈《「『【〔〖（［｛￡￥〝︵︷︹︻
+# ︽︿﹁﹃﹙﹛﹝（｛“‘-—_…]+'''
+# =============================================================================
 with open('C:/Users/TSR/Desktop/project data/ptt_tag_V1.csv') as csvfile:
     spamreader = csv.reader(csvfile)
     score = []
@@ -15,20 +26,27 @@ with open('C:/Users/TSR/Desktop/project data/ptt_tag_V1.csv') as csvfile:
         if i >= 201 :
             break
         elif i >= 2:
-            score.append(row[2])
-            content.append(row[3])
+            score.append(int(row[2]))
+            string = re.sub(r,'',row[3]) 
+            content.append(string)
 
-
+content[10]
 with open('C:/Users/TSR/Desktop/python/stopword.txt',encoding = 'utf8') as stopfile:
     spamreader = stopfile.read()
 
- 
+
 stop1 = spamreader.split('\n')
-
-
-
+# =============================================================================
+# 
+# r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n！？，]+' 
+# test = content[1]
+# 
+# string = re.sub(r,'',test) 
+# print('%r' % string)
+# print('%r' % test)
+# =============================================================================
 x = {}
-for a, b in zip(score, content):
+for a, b in zip(score[10:], content[10:]):
     if a not in x:
         x[a] = ""
     x[a] = x[a] + b
@@ -37,34 +55,38 @@ def content_to_dict(x):
     return dict(Counter(list(jieba.cut(x))))
 
 
-aaa = toolz.valmap(lambda x:dict(Counter(list(jieba.cut(x)))), x)
-#contents_cut = map(lambda x: Counter(list(jieba.cut(x))), x.values())
-#contents_cut = list(contents_cut)
+train_dict = toolz.valmap(content_to_dict, x)
 
-
+train_dict.keys()
+train_dict[9]
 def get_str_score(x):
     count = []
     weight = []
     score = []
-    for key in aaa.keys():
-        if x in aaa[key] :
-            count.append(aaa[key][x])
+    for key in train_dict.keys():
+        if x in train_dict[key] :
+            # 取得字詞出現次數
+            count.append(train_dict[key][x])
+            #留下對應權重
             weight.append(int(key))
         else :
             count.append(0)
             weight.append(0)
     for j in range(len(weight)):
         score.append(count[j]*weight[j])
-    
-    return sum(score)/sum(count)
+    if sum(count) == 0:
+        return 0
+    else:
+        return sum(score)/sum(count)
 
 def get_content_score(x):
     str_cut = list(jieba.cut(x))
     total_count = list(map(get_str_score,str_cut))
     return sum(total_count)/len(total_count)
 
-score_final = []
+predict = []
 for i in range(10):
-    score_final.append([get_content_score(content[i]),score[i]])
-
-print(score_final)
+    predict.append(get_content_score(content[i]))
+predict
+score[0:10]
+print(pearsonr(predict, score[0:10]))
