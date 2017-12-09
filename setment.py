@@ -23,14 +23,13 @@ with open('C:/Users/TSR/Desktop/project data/ptt_tag_V1.csv') as csvfile:
     i = 0
     for row in spamreader:
         i = i + 1
-        if i >= 201 :
+        if i >= 202 :
             break
         elif i >= 2:
             score.append(int(row[2]))
             string = re.sub(r,'',row[3]) 
             content.append(string)
 
-content[10]
 with open('C:/Users/TSR/Desktop/python/stopword.txt',encoding = 'utf8') as stopfile:
     spamreader = stopfile.read()
 
@@ -46,14 +45,15 @@ stop1 = spamreader.split('\n')
 # print('%r' % test)
 # =============================================================================
 x = {}
-for a, b in zip(score[10:], content[10:]):
+for a, b in zip(score[1:190], content[1:190]):
     if a not in x:
         x[a] = ""
     x[a] = x[a] + b
 
 def content_to_dict(x):
-    return dict(Counter(list(jieba.cut(x))))
-
+    list1 = list(jieba.cut(x))
+    list_nostop = filter(lambda x: x not in stop1, list1)
+    return dict(Counter(list_nostop))
 
 train_dict = toolz.valmap(content_to_dict, x)
 
@@ -85,8 +85,8 @@ def get_content_score(x):
     return sum(total_count)/len(total_count)
 
 predict = []
-for i in range(10):
+for i in range(190,200):
     predict.append(get_content_score(content[i]))
-predict
-score[0:10]
-print(pearsonr(predict, score[0:10]))
+
+print(pearsonr(predict, score[190:200]))
+
