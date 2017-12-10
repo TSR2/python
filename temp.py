@@ -7,6 +7,7 @@ from scipy.stats.stats import pearsonr
 import re
 import pandas
 import datetime
+import numpy
 
 df    = pandas.read_csv("C:/Users/TSR/Desktop/python/ptt_tag_V1_date_utf.csv")
 df.ix[1:5,:]
