@@ -3,11 +3,10 @@ from collections import Counter
 import jieba
 import csv
 import toolz
-import string
 from scipy.stats.stats import pearsonr
 import re
 
-r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n！？，﹚﹞！），．：；？｜︶︸︺︼︾﹀﹂﹄﹏､～]+' 
+r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~！？，﹚﹞！），．：；？｜︶︸︺︼︾﹀﹂﹄﹏､～]+' 
 
 
 # =============================================================================
@@ -35,6 +34,8 @@ with open('C:/Users/TSR/Desktop/python/stopword.txt',encoding = 'utf8') as stopf
 
 
 stop1 = spamreader.split('\n')
+stop1.append('\n')
+stop1.append('\r\n')
 # =============================================================================
 # 
 # r = '[’!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n！？，]+' 
@@ -45,7 +46,7 @@ stop1 = spamreader.split('\n')
 # print('%r' % test)
 # =============================================================================
 x = {}
-for a, b in zip(score[1:190], content[1:190]):
+for a, b in zip(score, content):
     if a not in x:
         x[a] = ""
     x[a] = x[a] + b
@@ -56,9 +57,8 @@ def content_to_dict(x):
     return dict(Counter(list_nostop))
 
 train_dict = toolz.valmap(content_to_dict, x)
-
 train_dict.keys()
-train_dict[9]
+train_dict[5]
 def get_str_score(x):
     count = []
     weight = []
@@ -84,9 +84,11 @@ def get_content_score(x):
     total_count = list(map(get_str_score,str_cut))
     return sum(total_count)/len(total_count)
 
-predict = []
-for i in range(190,200):
-    predict.append(get_content_score(content[i]))
-
-print(pearsonr(predict, score[190:200]))
+# =============================================================================
+# predict = []
+# for i in range(190,200):
+#     predict.append(get_content_score(content[i]))
+# 
+# print(pearsonr(predict, score[190:200]))
+# =============================================================================
 
