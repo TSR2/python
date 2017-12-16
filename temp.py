@@ -1,4 +1,4 @@
-
+ # -*- coding: utf-8 -*-
 from collections import Counter
 import jieba
 import csv
@@ -7,35 +7,113 @@ from scipy.stats.stats import pearsonr
 import re
 import pandas
 import datetime
-import numpy
+import matplotlib.pyplot as plt
+import matplotlib
 
-df    = pandas.read_csv("C:/Users/TSR/Desktop/python/ptt_tag_V1_date_utf.csv")
-df.ix[1:5,:]
 
-ss = []
-df.shape
-get_content_score(df.text[100])
-df.date[1:100]
-ss = list(map(get_content_score, df.text[1900:1990]))
+df_org    = pandas.read_csv("C:/Users/TSR/Desktop/python/ptt_tag_V1_date_utf.csv")
 
-df['setment'] = ss
+df = df_org[~df_org.date.isnull()]
+df.index = range(df.shape[0])
+sum(df.date.isnull())
+# =============================================================================
+# get_content_score(df.text[100])
+# =============================================================================
+test=df.date[1:100]
 
-df.ix[1:5,:]
 
-ass = df.date[1:100]
+def txn_date(x):
+    if x.find('月') > 1:
+        date = x.strip()
+        mm = date[0:date.find('月')]
+        dd = date[date.find('月')+1:date.find('日')]
+        date_final = datetime.datetime(2017, int(mm), int(dd))
+    else:
+        date = x.strip()
+        mm = date[0:date.find('/')]
+        dd = date[date.find('/')+1:]
+        date_final = datetime.datetime(2017, int(mm), int(dd))
+    return date_final
 
-ass
+len(df.date)
 
-ass.str.contains('月')
 
-ass[2].find('月')  
+df['date_new'] = pandas.Series(map(txn_date,df.date))
+df[['date','date_new']]
+df.columns
+df['predict_tag'] = pandas.Series(map(get_content_score,df.text))
 
-ass[2].index('月')
-aa = datetime.date(2001,9,19)
+df[['tag','predict_tag']]
 
-aa1 = datetime.date(2001,9,20)
-aa + 3
-aa1 - aa  == 1
 
-f1 = df.ix[0,:]
-def 
+score_df = pandas.DataFrame()
+
+for j in ['花旗','玉山','台新','國泰','中信']:
+    mean_score = []
+    date1 = []
+    for i in range(90):
+        str_con = df.titl.str.contains(j)
+        end = datetime.datetime(2017, 8, 1)  + datetime.timedelta(i)
+        start_date = df.date_new >= end - datetime.timedelta(9)
+        end_date = df.date_new <= end
+        
+        test1 = df[str_con & start_date & end_date]
+        
+        mean_score.append(test1.predict_tag.mean(0))
+        date1.append(end)
+    score_df[j] = mean_score
+    
+score_df.index  =date1
+
+print(score_df.columns)
+score_df.columns[0]
+
+
+score_df.plot()
+
+fig = matplotlib.pyplot.gcf()
+fig.set_size_inches(18.5, 12.5)
+fig.savefig('test2png.png', dpi=300)
+
+
+
+
+
+# =============================================================================
+# 
+# 
+# 
+# df.titl[df.titl.str.contains('花旗')]
+# df.date_new <= datetime.datetime(2017, 10, 1)
+# test[test.str.contains('月')]
+# tt = datetime.datetime(2009, 11, 8)
+# tt1 = datetime.datetime(2009, 11, 15)
+# p = tt1 -tt
+# p.days
+# df.date_new[1] <= datetime.datetime(2009, 11, 15)
+# datetime.datetime(2009, 11, 15) + datetime.timedelta(30)
+# 
+# ss = list(map(get_content_score, df.text[1900:1990]))
+# 
+# df['setment'] = ss
+# 
+# df.ix[1:5,:]
+# 
+# ass = df.date[1:100]
+# 
+# ass
+# 
+# ass.str.contains('月')
+# 
+# ass[98].find('日')  
+# 
+# ass[2].index('月')
+# aa = datetime.date(2001,9,19)
+# 
+# aa1 = datetime.date(2001,9,20)
+# aa + 3
+# aa1 - aa  == 1
+# 
+# f1 = df.ix[0,:]
+# def 
+# =============================================================================
