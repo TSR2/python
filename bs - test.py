@@ -35,11 +35,11 @@ for j in range(2000,2001):
         #print(content1)
         #print(snownlp.SnowNLP(content1).sentiments)
         print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-        print(list(jieba.cut(content1)))
+        #print(list(jieba.cut(content1)))
         #推文
         push_tag = main_soup.select('div[class="push"]')
         #print(list(map(lambda x:len(x.contents), push_tag)))
-        print(push_tag)
+        #print(push_tag)
 
         def get_push(x):
             if x.contents[2].string != None :  
@@ -67,17 +67,19 @@ for j in range(2000,2001):
         #print(x.keys())
         #print(x.values())
 
-        def map_se(x):
-            point = (snownlp.SnowNLP(x).sentiments -0.5)*2
-            return [x,point]
-        se = list(map(map_se, x.values()))
-        print(list(se))
+# =============================================================================
+#         def map_se(x):
+#             point = (snownlp.SnowNLP(x).sentiments -0.5)*2
+#             return [x,point]
+#         se = list(map(map_se, x.values()))
+#         print(list(se))
+# =============================================================================
 
         if push[i].string == None:
             push[i].string = '0'
         if title[i].string != None:
-            list1.append([title[i].string, title[i]['href'], push[i].string, author[i].string, date[i].string,content1, list(se)]) 
+            list1.append([title[i].string, title[i]['href'], push[i].string, author[i].string, date[i].string,content1, len(x)]) 
 
 
 for i in range(5):
-    print(list1[i])
+    print(list1[i][])

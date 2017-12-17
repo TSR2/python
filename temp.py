@@ -45,12 +45,16 @@ df['predict_tag'] = pandas.Series(map(get_content_score,df.text))
 
 df[['tag','predict_tag']]
 
+df.push
+Counter(df.push)
 
 score_df = pandas.DataFrame()
+talk_df = pandas.DataFrame()
 
 for j in ['花旗','玉山','台新','國泰','中信']:
     mean_score = []
     date1 = []
+    talk = []
     for i in range(90):
         str_con = df.titl.str.contains(j)
         end = datetime.datetime(2017, 8, 1)  + datetime.timedelta(i)
@@ -60,21 +64,36 @@ for j in ['花旗','玉山','台新','國泰','中信']:
         test1 = df[str_con & start_date & end_date]
         
         mean_score.append(test1.predict_tag.mean(0))
+        talk.append(test1.push.sum(0))
         date1.append(end)
     score_df[j] = mean_score
+    talk_df[j] = talk
     
 score_df.index  =date1
-
+talk_df.index = date1
 print(score_df.columns)
 score_df.columns[0]
 
-
 score_df.plot()
+talk_df.plot()
 
 fig = matplotlib.pyplot.gcf()
 fig.set_size_inches(18.5, 12.5)
 fig.savefig('test2png.png', dpi=300)
 
+
+def print_full(x):
+    pandas.set_option('display.max_rows', len(x))
+    print(x)
+    pandas.reset_option('display.max_rows')
+
+print_full(score_df['國泰'])
+
+
+str_con = df.titl.str.contains('台新')
+tt1 = df[str_con][['titl','predict_tag','date_new','push']]
+
+print_full(tt1.sort_values(by=['date_new']))
 
 
 
