@@ -80,8 +80,9 @@ for a, b in zip(score, content):
         x[a] = ""
     x[a] = x[a] + b
 
-jieba.load_userdict('C:/Users/TSR/Desktop/python/stopword.txt')
-
+jieba.load_userdict('Data_pre2_userdict.txt')
+#jieba.load_userdict('C:/Users/TSR/Desktop/python/17Q4 ptt/Data_pre2_userdict.txt')
+#jieba.del_word("中國信託")
 
 def content_to_dict(x):
     list1 = list(jieba.cut(x))
@@ -90,7 +91,7 @@ def content_to_dict(x):
 
 train_dict = toolz.valmap(content_to_dict, x)
 train_dict.keys()
-train_dict[-3]
+train_dict[-7]
 
 # =============================================================================
 # for i in range(9):
@@ -178,38 +179,72 @@ df[['date', 'date_new']]
 df.columns
 df['predict_tag'] = pandas.Series(map(get_content_score, df.text))
 
-df[['tag', 'predict_tag']]
 
+#聲量線圖
+#情感分數
 score_df = pandas.DataFrame()
+#推文數量
+talk_df = pandas.DataFrame()
+#發文數量
+post_df = pandas.DataFrame()
 
-for j in ['花旗', '玉山', '台新', '國泰', '中信']:
+for j in ['花旗','台新','國泰','富邦','玉山']:
     mean_score = []
     date1 = []
+    talk = []
+    post_count = []
     for i in range(90):
         str_con = df.titl.str.contains(j)
-        end = datetime.datetime(2017, 8, 1) + datetime.timedelta(i)
+        if j == "國泰" :
+            str_con = df.titl.str.contains(j) & ~df.titl.str.contains("國泰航空")
+    
+        end = datetime.datetime(2017, 8, 1)  + datetime.timedelta(i)
         start_date = df.date_new >= end - datetime.timedelta(9)
         end_date = df.date_new <= end
-
+        
         test1 = df[str_con & start_date & end_date]
-
+        
+        post_count.append(test1.shape[0])
         mean_score.append(test1.predict_tag.mean(0))
+        talk.append(test1.push.sum(0))
         date1.append(end)
+    post_df[j] = post_count
     score_df[j] = mean_score
+    talk_df[j] = talk
+    
+post_df.index = date1    
+score_df.index  =date1
+talk_df.index = date1
 
-score_df.index = date1
-
-print(score_df.columns)
-score_df.columns[0]
-
+post_df.plot()
 score_df.plot()
+talk_df.plot()
+
+
+def print_full(x):
+    pandas.set_option('display.max_rows', len(x))
+    print(x)
+    pandas.reset_option('display.max_rows')
+
+print_full(score_df['國泰'])
+print_full(score_df['富邦'])
+check = df[df.titl.str.contains('富邦')][['titl','predict_tag','date_new','push']]
+print_full(check.sort_values(by=['date_new']))
+
+sum(df.titl == '富邦')
+
+str_con = df.titl.str.contains('花旗')
+tt1 = df[str_con][['titl','predict_tag','date_new','push']]
+
+print_full(tt1.sort_values(by=['date_new']))
+
+
+
+
 
 fig = matplotlib.pyplot.gcf()
 fig.set_size_inches(18.5, 12.5)
 fig.savefig('test2png.png', dpi=300)
-
-
-
 
 
 # =============================================================================
