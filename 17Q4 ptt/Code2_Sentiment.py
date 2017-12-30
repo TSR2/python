@@ -80,8 +80,8 @@ for a, b in zip(score, content):
         x[a] = ""
     x[a] = x[a] + b
 
-jieba.load_userdict('Data_pre2_userdict.txt')
-#jieba.load_userdict('C:/Users/TSR/Desktop/python/17Q4 ptt/Data_pre2_userdict.txt')
+#jieba.load_userdict('Data_pre2_userdict.txt')
+jieba.load_userdict('C:/Users/TSR/Desktop/python/17Q4 ptt/Data_pre2_userdict.txt')
 #jieba.del_word("中國信託")
 
 def content_to_dict(x):
@@ -147,9 +147,9 @@ def get_content_score(x):
 # 
 # =============================================================================
 
-df_org = pandas.read_csv("C:/Users/TSR/Desktop/python/ptt_tag_V1_date_utf.csv")
+df_org = pandas.read_csv("C:/Users/TSR/Desktop/python/17Q4 ptt/Data1_ptt.csv")
 
-df = df_org[~df_org.date.isnull()]
+df = df_org[~df_org.date.isnull() & ~df_org.text.isnull()]
 df.index = range(df.shape[0])
 sum(df.date.isnull())
 # =============================================================================
@@ -176,9 +176,25 @@ len(df.date)
 
 df['date_new'] = pandas.Series(map(txn_date, df.date))
 df[['date', 'date_new']]
-df.columns
 df['predict_tag'] = pandas.Series(map(get_content_score, df.text))
 
+tt = df.push
+
+tt[tt == "XX"] = "-100"
+tt[tt == "X1"] = "-10"
+tt[tt == "X2"] = "-20"
+tt[tt == "X3"] = "-30"
+tt[tt == "X4"] = "-40"
+tt[tt == "X5"] = "-50"
+tt[tt == "爆"] = "100"
+
+df['final_push'] = tt.astype(int)
+df.final_push
+df.to_csv("C:/Users/TSR/Desktop/python/17Q4 ptt/Data2_ptt_sentment.csv")
+
+df.reply.sum()
+
+aa.astype(int)
 
 #聲量線圖
 #情感分數
@@ -187,18 +203,21 @@ score_df = pandas.DataFrame()
 talk_df = pandas.DataFrame()
 #發文數量
 post_df = pandas.DataFrame()
+#討論人數
+reply_df = pandas.DataFrame()
 
 for j in ['花旗','台新','國泰','富邦','玉山']:
     mean_score = []
     date1 = []
     talk = []
+    reply = []
     post_count = []
-    for i in range(90):
+    for i in range(180):
         str_con = df.titl.str.contains(j)
         if j == "國泰" :
             str_con = df.titl.str.contains(j) & ~df.titl.str.contains("國泰航空")
     
-        end = datetime.datetime(2017, 8, 1)  + datetime.timedelta(i)
+        end = datetime.datetime(2017, 6, 1)  + datetime.timedelta(i)
         start_date = df.date_new >= end - datetime.timedelta(9)
         end_date = df.date_new <= end
         
@@ -206,19 +225,25 @@ for j in ['花旗','台新','國泰','富邦','玉山']:
         
         post_count.append(test1.shape[0])
         mean_score.append(test1.predict_tag.mean(0))
-        talk.append(test1.push.sum(0))
+        talk.append(test1.final_push.sum(0))
+        reply.append(test1.reply.sum(0))
         date1.append(end)
+        
     post_df[j] = post_count
     score_df[j] = mean_score
     talk_df[j] = talk
+    reply_df[j] = reply
     
 post_df.index = date1    
 score_df.index  =date1
 talk_df.index = date1
+reply_df.index = date1
+
 
 post_df.plot()
 score_df.plot()
 talk_df.plot()
+reply_df.plot()
 
 
 def print_full(x):
@@ -227,8 +252,8 @@ def print_full(x):
     pandas.reset_option('display.max_rows')
 
 print_full(score_df['國泰'])
-print_full(score_df['富邦'])
-check = df[df.titl.str.contains('富邦')][['titl','predict_tag','date_new','push']]
+print_full(score_df['花旗'])
+check = df[df.titl.str.contains('台新')][['titl','predict_tag','date_new','push','reply']]
 print_full(check.sort_values(by=['date_new']))
 
 sum(df.titl == '富邦')
@@ -241,7 +266,39 @@ print_full(tt1.sort_values(by=['date_new']))
 
 
 
+def save_plot(x,title,filename):
+    x.plot(title = title,fontsize=20)
+    fig = matplotlib.pyplot.gcf()
+    fig.set_size_inches(18.5, 12.5)
+    fig.savefig(filename + '.png', dpi=300)
 
+def save_pie(x,title,filename):
+    x.sum(0).plot.pie(title = title, figsize=(8, 8) ,fontsize=30)
+    fig = matplotlib.pyplot.gcf()
+    fig.set_size_inches(18.5, 12.5)
+    fig.savefig(filename + '.png', dpi=300)
+
+save_plot(post_df, "post", "post")
+save_plot(score_df, "socre", "socre")
+save_plot(talk_df, "talk", "talk")
+save_plot(reply_df, "reply", "reply")
+
+save_pie(post_df, "post", "post_pie")
+save_pie(score_df, "socre", "socre_pie")
+save_pie(talk_df, "talk", "talk_pie")
+save_pie(reply_df, "reply", "reply_pie")
+
+
+tt=post_df.sum(0)
+
+tt.plot.pie(subplots=True, figsize=(8, 8),fontsize=20)
+
+post_df.plot(fontsize=20)
+score_df.plot()
+talk_df.plot()
+reply_df.plot()
+
+tt.plot.pie(subplots=True, figsize=(8, 8),fontsize=20)
 fig = matplotlib.pyplot.gcf()
 fig.set_size_inches(18.5, 12.5)
 fig.savefig('test2png.png', dpi=300)
