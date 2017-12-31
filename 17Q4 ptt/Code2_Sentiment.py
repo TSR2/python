@@ -81,7 +81,13 @@ for a, b in zip(score, content):
     x[a] = x[a] + b
 
 #jieba.load_userdict('Data_pre2_userdict.txt')
-jieba.load_userdict('C:/Users/TSR/Desktop/python/17Q4 ptt/Data_pre2_userdict.txt')
+#jieba.load_userdict('C:/Users/TSR/Desktop/python/17Q4 ptt/Data_pre2_userdict.txt')
+cut1 = pandas.read_csv("Data_pre2_userdict.txt")
+
+for i in cut1.AA:
+    jieba.add_word(i)
+
+
 #jieba.del_word("中國信託")
 
 def content_to_dict(x):
@@ -91,7 +97,7 @@ def content_to_dict(x):
 
 train_dict = toolz.valmap(content_to_dict, x)
 train_dict.keys()
-train_dict[-7]
+train_dict[-3]
 
 # =============================================================================
 # for i in range(9):
@@ -155,7 +161,6 @@ sum(df.date.isnull())
 # =============================================================================
 # get_content_score(df.text[100])
 # =============================================================================
-test = df.date[1:100]
 
 
 def txn_date(x):
@@ -179,7 +184,6 @@ df[['date', 'date_new']]
 df['predict_tag'] = pandas.Series(map(get_content_score, df.text))
 
 tt = df.push
-
 tt[tt == "XX"] = "-100"
 tt[tt == "X1"] = "-10"
 tt[tt == "X2"] = "-20"
@@ -192,9 +196,15 @@ df['final_push'] = tt.astype(int)
 df.final_push
 df.to_csv("C:/Users/TSR/Desktop/python/17Q4 ptt/Data2_ptt_sentment.csv")
 
-df.reply.sum()
 
-aa.astype(int)
+
+df = pandas.read_csv("C:/Users/TSR/Desktop/python/17Q4 ptt/Data2_ptt_sentment.csv")
+
+tt = df.date_new.tolist()
+
+df.date_new = pandas.Series(map(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'),tt))
+
+
 
 #聲量線圖
 #情感分數
@@ -206,13 +216,13 @@ post_df = pandas.DataFrame()
 #討論人數
 reply_df = pandas.DataFrame()
 
-for j in ['花旗','台新','國泰','富邦','玉山']:
+for j in ['花旗','台新','國泰','富邦','玉山','中信']:
     mean_score = []
     date1 = []
     talk = []
     reply = []
     post_count = []
-    for i in range(180):
+    for i in range(202):
         str_con = df.titl.str.contains(j)
         if j == "國泰" :
             str_con = df.titl.str.contains(j) & ~df.titl.str.contains("國泰航空")
@@ -245,6 +255,193 @@ score_df.plot()
 talk_df.plot()
 reply_df.plot()
 
+post_df.to_csv("Data3_post.csv")
+score_df.to_csv("Data3_sentment.csv")
+talk_df.to_csv("Data3_talk.csv")
+reply_df.to_csv("Data3_reply.csv")
+
+
+
+###
+
+
+score_date_df = pandas.DataFrame()
+#推文數量
+talk_date_df = pandas.DataFrame()
+#發文數量
+post_date_df = pandas.DataFrame()
+#討論人數
+reply_date_df = pandas.DataFrame()
+
+
+for j in ['花旗','台新','國泰','富邦','玉山','中信']:
+    mean_score = []
+    date1 = []
+    talk = []
+    reply = []
+    post_count = []
+    for i in range(212):
+        str_con = df.titl.str.contains(j)
+        if j == "國泰" :
+            str_con = df.titl.str.contains(j) & ~df.titl.str.contains("國泰航空")
+    
+        targetdate = datetime.datetime(2017, 6, 1)  + datetime.timedelta(i)
+        date_ind = df.date_new == targetdate
+        
+        test1 = df[str_con & date_ind]
+        
+        post_count.append(test1.shape[0])
+        mean_score.append(test1.predict_tag.mean(0))
+        talk.append(test1.final_push.sum(0))
+        reply.append(test1.reply.sum(0))
+        date1.append(targetdate)
+        
+    post_date_df[j] = post_count
+    score_date_df[j] = mean_score
+    talk_date_df[j] = talk
+    reply_date_df[j] = reply
+
+post_date_df.index = date1    
+score_date_df.index  =date1
+talk_date_df.index = date1
+reply_date_df.index = date1
+
+post_date_df.to_csv("Data3_post_date.csv")
+score_date_df.to_csv("Data3_sentment_date.csv")
+talk_date_df.to_csv("Data3_talk_date.csv")
+reply_date_df.to_csv("Data3_reply_date.csv")
+
+
+#拆類別
+
+
+score_date_df = pandas.DataFrame()
+#推文數量
+talk_date_df = pandas.DataFrame()
+#發文數量
+post_date_df = pandas.DataFrame()
+#討論人數
+reply_date_df = pandas.DataFrame()
+
+
+split_list = []
+
+split_list.append(['核卡','額度','調額','財力'])
+split_list.append(['登錄','登記','活動','回饋','優惠','促刷','點數'])
+split_list.append(['盜刷','客服','安全','服務','方便'])
+
+split_index_list=[]
+
+for j in split_list:
+    mean_score = []
+    date1 = []
+    talk = []
+    reply = []
+    post_count = []
+    FF = pandas.Series([ False for i in range(df.shape[0])])
+    for i in j:
+        titl_index = df.titl.str.contains(i) | df.text.str.contains(i)
+        FF = FF | titl_index 
+    
+    split_index_list.append(FF)
+
+df.shape
+sum(split_index_list[0]|split_index_list[1]|split_index_list[2])
+
+df[split_index_list[0]]['A'] = 1
+
+nogroup = df[~(split_index_list[0]|split_index_list[1]|split_index_list[2])]
+nogroup.to_csv("Data4_nogroup.csv")
+
+df['A'] = 0
+df['B'] = 0
+df['C'] = 0
+df.A[split_index_list[0]] = 1
+df.B[split_index_list[1]] = 1
+df.C[split_index_list[2]] = 1
+
+
+df.to_csv("Data4_ABC.csv")
+
+print(sum(split_index_list[0]))
+print(sum(split_index_list[1]))
+print(sum(split_index_list[2]))
+
+
+sum(split_index_list[1])
+sum(split_index_list[2])
+
+
+
+df.columns
+
+#聲量線圖
+#情感分數
+dd = []
+for k in [12,13,14]:
+    score_df = pandas.DataFrame()
+    for j in ['花旗','台新','國泰','富邦','玉山','中信']:
+        mean_score = []
+        date1 = []
+        talk = []
+        reply = []
+        post_count = []
+        for i in range(202):
+            df1 = df[df.iloc[:,k]==1]
+            str_con = df1.titl.str.contains(j)
+            
+            if j == "國泰" :
+                str_con = df1.titl.str.contains(j) & ~df1.titl.str.contains("國泰航空")
+        
+            end = datetime.datetime(2017, 6, 1)  + datetime.timedelta(i)
+            start_date = df1.date_new >= end - datetime.timedelta(9)
+            end_date = df1.date_new <= end
+            
+            test1 = df1[str_con & start_date & end_date]
+            if test1.shape[0] == 0:
+                mean_score.append(df1[str_con].predict_tag.mean(0))
+            else:
+                mean_score.append(test1.predict_tag.mean(0))
+            date1.append(end)
+            
+        score_df[j] = mean_score
+    score_df.index = date1     
+    dd.append(score_df)
+
+for i in dd:
+    i.plot()
+
+
+
+
+
+
+#類別count
+
+type_index = {}
+type_index['A'] = df.A == 1
+type_index['B'] = df.B == 1
+type_index['C'] = df.C == 1
+type_index['AB'] = (df.A == 1) & (df.B == 1)
+type_index['AC'] = (df.A == 1) & (df.C == 1)
+type_index['BC'] = (df.B == 1) & (df.C == 1)
+type_index['ABC'] = (df.A == 1) & (df.B == 1) & (df.C == 1)
+
+
+
+for i in ['A','B','C','AB','AC','BC','ABC']:
+    
+    for j in ['花旗','台新','國泰','富邦','玉山','中信']:
+        df[type_index[i] & type_index[i]]
+
+
+
+
+
+
+
+
+
 
 def print_full(x):
     pandas.set_option('display.max_rows', len(x))
@@ -253,7 +450,7 @@ def print_full(x):
 
 print_full(score_df['國泰'])
 print_full(score_df['花旗'])
-check = df[df.titl.str.contains('台新')][['titl','predict_tag','date_new','push','reply']]
+check = df[df.titl.str.contains('凱基')][['titl','predict_tag','date_new','push','reply']]
 print_full(check.sort_values(by=['date_new']))
 
 sum(df.titl == '富邦')
