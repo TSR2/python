@@ -204,6 +204,19 @@ tt = df.date_new.tolist()
 
 df.date_new = pandas.Series(map(lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'),tt))
 
+def test1(x):
+    y = x.upper()
+    pp = re.sub('LINE PAY','LINEPAY',y)
+    pp = re.sub('MONEY BACK','MONEYBACK',pp)
+    return(pp)
+
+aa = pandas.Series(map(test1,df.text))
+df.text = aa
+aa = pandas.Series(map(test1,df.titl))
+df.titl = aa
+
+
+df.text[df.text.str.contains('LINE')]
 
 
 #聲量線圖
@@ -408,8 +421,10 @@ for k in [12,13,14]:
     score_df.index = date1     
     dd.append(score_df)
 
-for i in dd:
-    i.plot()
+type1 = ['A','B','C']
+
+for i in range(3):
+    dd[i].to_csv("sentment by type" + type1[i] + ".csv")
 
 
 
@@ -428,23 +443,136 @@ type_index['BC'] = (df.B == 1) & (df.C == 1)
 type_index['ABC'] = (df.A == 1) & (df.B == 1) & (df.C == 1)
 
 
-
-for i in ['A','B','C','AB','AC','BC','ABC']:
-    
-    for j in ['花旗','台新','國泰','富邦','玉山','中信']:
-        df[type_index[i] & type_index[i]]
+rowname = ['A','B','C','AB','AC','BC','ABC']
+colname = ['花旗','台新','國泰','富邦','玉山','中信']
 
 
+df_reply = pandas.DataFrame()
+df_post = pandas.DataFrame()
+for i in rowname:
+    reply_rowlist = {}
+    post_rowlist = {}
+    for j in colname:
+        str_con = df.titl.str.contains(j)
+        df1 = df[type_index[i] & str_con]
+        
+        reply_rowlist[j] = sum(df1.reply)
+        post_rowlist[j] = df1.shape[0]
+    df_reply = df_reply.append(pandas.DataFrame.from_dict([reply_rowlist]))
+    df_post = df_post.append(pandas.DataFrame.from_dict([post_rowlist]))
+
+df_reply.index = rowname
+df_post.index = rowname
+
+df_post.to_csv('post count by type.csv')
+df_reply.to_csv('reply count by type.csv')
 
 
 
 
 
+#卡別
+def print_select(x):
+    titl_index = df.titl.str.contains(x)
+    text_index = df.text.str.contains(x)
+    print(df[titl_index | text_index]['titl'])
 
 
+def print_select(x):
+    titl_index = df.titl.str.contains(x)
+    print(df[titl_index]['titl'])
+print_select('大中華')
 
-def print_full(x):
-    pandas.set_option('display.max_rows', len(x))
+print(df[4024:4025]['titl'])
+
+
+ee = {}
+def get_count(x):
+    titl_index = df.titl.str.contains(x)
+    text_index = df.text.str.contains(x)
+    return(sum(titl_index | text_index))
+
+cardtype = {}
+cardtype['國泰KOKO'] = ['KOKO']
+cardtype['兆豐E秒刷'] = ['E秒']
+cardtype['台新GOGO'] = ['GOGO','RICHART','黑狗','紫狗']
+cardtype['匯豐現金'] = ['匯豐現金']
+cardtype['元大鑽金'] = ['鑽金']
+cardtype['富邦數位生活'] = ['數位生活']
+cardtype['中信line PAY'] = ["中信LP","中信 LP","中信 LINEPAY","中信LINEPAY","中國信託LINEPAY","中國信託 LINEPAY"]
+cardtype['樂天'] = ['樂天']
+cardtype['花旗現金回饋'] = ['花旗現金回饋']
+cardtype['花旗響樂'] = ['饗樂','響樂']
+cardtype['國泰COSTCO'] = ['COSTCO','好市多']
+cardtype['中信ANA'] = ['ANA']
+cardtype['花旗寰旅'] = ['寰旅']
+cardtype['國泰亞洲萬里通'] = ['國泰亞萬','國泰亞洲萬里通']
+cardtype['中信大中華'] = ['大中華']
+cardtype['國泰長榮'] = ['國泰長榮','國泰世華長榮']
+cardtype['美國運通'] = ['美國運通']
+cardtype['台新國泰'] = ['台新國泰']
+cardtype['美國運通'] = ['美國運通']
+
+def get_count(x):
+    Series1 = pandas.Series([ False for i in range(df.shape[0])])
+    for i in x:
+        titl_index = df.titl.str.contains(i)
+        text_index = df.text.str.contains(i)
+        Series1 = Series1 | titl_index | text_index
+    return(sum(Series1))
+
+def get_count3(x):
+    Series1 = pandas.Series([ False for i in range(df.shape[0])])
+    for i in x:
+        titl_index = df.titl.str.contains(i)
+        Series1 = Series1 | titl_index
+    return(sum(Series1))
+
+cardtype_count = {}
+for i in cardtype:
+    count1 = get_count(cardtype[i])
+    cardtype_count[i] = count1
+
+cardtype_count2 = {}
+for i in cardtype:
+    count1 = get_count3(cardtype[i])
+    cardtype_count2[i] = count1
+cardtype_count 
+cardtype_count2
+fout = "card type count(title).csv"
+fo = open(fout, "w")
+
+for k, v in cardtype_count2.items():
+    fo.write(str(k) + ','+ str(v) + '\n')
+
+fo.close()
+
+
+def get_count2(x):
+    titl_index = df.titl.str.contains(x)
+    text_index = df.text.str.contains(x)
+    ee[x] = sum(titl_index | text_index)
+
+cash = ["KOKO","玉山ICASH","E秒","GOGO","元大鑽金","中信LP","中信 LINEPAY","中信LINEPAY",'樂天','花旗現金']
+reward = ['饗樂','COSTCO','好市多','威秀','華航','大中華','數位生活']
+mile = ['ANA','寰旅','MONEYBACK','渣打現金回饋','亞萬','國泰亞洲萬里通','國泰長榮','飛行','匯豐華航','華航匯豐','國泰亞洲萬里通','台新國泰','美國運通']
+aa = list(map(get_count2, cash))
+
+aa = list(map(get_count2, reward))
+
+aa = list(map(get_count2, mile))
+
+ee
+
+
+for i in ee:
+    print(i)
+
+
+############雜項
+
+def print_full(x,y):
+    pandas.set_option('display.max_rows', y)
     print(x)
     pandas.reset_option('display.max_rows')
 
@@ -459,6 +587,14 @@ str_con = df.titl.str.contains('花旗')
 tt1 = df[str_con][['titl','predict_tag','date_new','push']]
 
 print_full(tt1.sort_values(by=['date_new']))
+
+
+
+
+
+
+
+
 
 
 

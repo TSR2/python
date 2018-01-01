@@ -10,14 +10,14 @@ import math
 #jieba.set_dictionary('/dict.txt')   #引用預設詞庫
 #stop = open('stop_PTT.txt') #引用停用詞
 
-df    = pd.read_csv("Data5_pttUTF8.txt")
-df_SI = df.loc[:103, ['titl', 'push', 'tag', 'stage', 'item', 'text']]
+df    = pd.read_csv("Data4_ABC.csv")
+df_SI = df.loc[:2000, ]
 # print(df_SI)
 
 # 將ppt內文全部斷詞，將原始資料計算項目個數，再做成字串
 
 word_list1 =[]
-for item1 in df_SI['text']:
+for item1 in df_SI[df_SI.B == 1]['text']:
     seglist = jieba.cut(item1, cut_all=False)
 
     word_list2 = []
@@ -34,6 +34,10 @@ for item1 in df_SI['text']:
 df_new = pd.concat(word_list1,ignore_index=True)
 header = list(df_new)
 
+df_new[df_new.isnull()] = 0
+
+df_new1 = df_new
+df_new1.astype(int)
 # TF-IDF
 
 df_Bank=pd.DataFrame()
@@ -41,7 +45,9 @@ list_bank = ['花旗','中信','台新','國泰','玉山']
 for item_bank in list_bank:
 
     arti_bank = df_new[df_new[item_bank]>0]
-    TF = arti_bank.sum(axis=0) / sum(arti_bank.sum(axis=0))
+    arti_bank1 = arti_bank
+    arti_bank1[arti_bank1.isnull()] = 0
+    TF = arti_bank.sum(axis=0) / sum(arti_bank1.sum(axis=0))
     #print(TF)
 
     shp = df_new.shape[0]
@@ -66,7 +72,10 @@ for item_bank in list_bank:
     df_TFIDF1 = df_TFIDF.sort_values(item_bank+'_ti',ascending=False).reset_index(drop=True)
     df_Bank = pd.concat([df_Bank,df_TFIDF1], axis=1)
 
-# print(df_Bank)
+print(df_Bank)
+
+sum(TF.isnull())
+df_Bank.花旗_ti[~df_Bank.花旗_ti.isnull()]
 
 '''
 
