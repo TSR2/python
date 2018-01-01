@@ -528,6 +528,14 @@ def get_count3(x):
         Series1 = Series1 | titl_index
     return(sum(Series1))
 
+def get_count4(x):
+    Series1 = pandas.Series([ False for i in range(df.shape[0])])
+    for i in x:
+        titl_index = df.titl.str.contains(i)
+        text_index = df.text.str.contains(i)
+        Series1 = Series1 | titl_index | text_index
+    return(sum(df.reply[Series1]))
+
 cardtype_count = {}
 for i in cardtype:
     count1 = get_count(cardtype[i])
@@ -539,6 +547,14 @@ for i in cardtype:
     cardtype_count2[i] = count1
 cardtype_count 
 cardtype_count2
+
+cardtype_count = {}
+for i in cardtype:
+    count1 = get_count4(cardtype[i])
+    cardtype_count[i] = count1
+
+
+
 fout = "card type count(title).csv"
 fo = open(fout, "w")
 
